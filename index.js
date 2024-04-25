@@ -8,8 +8,8 @@ const server = express()
 const URL = process.env.DEV_URL;
 const PORT = process.env.DEV_PORT;
 
-app.use("/api/", note)
-app.use("/api/user", user)
+server.use("/api/", note)
+server.use("/api/user", user)
 
 //Connect to mongodb atlas and start server
 const startServer = async () => {
