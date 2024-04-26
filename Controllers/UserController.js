@@ -1,12 +1,15 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const { client } = require("../mongodb");
 const {
-  isValidEmail,
-  isEmailBody,
-  isValidPassword,
+    isValidEmail,
+    isEmailBody,
+    isValidPassword,
 } = require("../Util/Validate");
-const { hashPassword, compareHash } = require("../Services/bcrypt");
+const { hashPassword, compareHash } = require("../Model/bcrypt");
+const Ajv = require("ajv");
+const { userSchema } = require("../Model/UserSchema");
+const jwt = require("jsonwebtoken");
+const ajv = new Ajv();
 const user = express.Router();
 
 //Get Database
@@ -16,27 +19,19 @@ const usersCl = userDb.collection("users");
 
 user.use(express.json());
 
+const validate = ajv.compile(userSchema)
 user
   .post("/signup", isEmailBody, async (req, res) => {
     let { email, password } = req.body;
     email = email.toLowerCase();
     const newUser = { email, password };
 
-    if (!email) return res.status(400).json({ message: "Email is required" });
+    const valid = validate(newUser);
+    if(!valid){
+        return res.status(400).json({message: "Invalid data", errors: validate.errors})
+    }
 
-    if (!isValidEmail(email))
-      return res.status(400).json({ message: "Invalid email format" });
 
-    if (!password)
-      return res.status(400).json({ message: "Password is required" });
-
-    if (!isValidPassword(password))
-      return res
-        .status(400)
-        .json({
-          message:
-            "Invalid password format, must contain atleast 1 Uppercase and 1 number",
-        });
 
     try {
       const checkExistingUser = await usersCl.findOne({ email: newUser.email });
