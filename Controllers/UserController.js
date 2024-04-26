@@ -1,10 +1,6 @@
 const express = require("express");
 const { client } = require("../mongodb");
-const {
-    isValidEmail,
-    isEmailBody,
-    isValidPassword,
-} = require("../Util/Validate");
+const {isRegisterBody} = require("../Util/Validate");
 const { hashPassword, compareHash } = require("../Model/bcrypt");
 const Ajv = require("ajv");
 const { userSchema } = require("../Model/UserSchema");
@@ -21,17 +17,28 @@ user.use(express.json());
 
 const validate = ajv.compile(userSchema)
 user
-  .post("/signup", isEmailBody, async (req, res) => {
+  .post("/signup", isRegisterBody, async (req, res) => {
     let { email, password } = req.body;
     email = email.toLowerCase();
     const newUser = { email, password };
 
     const valid = validate(newUser);
     if(!valid){
-        return res.status(400).json({message: "Invalid data", errors: validate.errors})
+        if(validate.errors[0].dataPath === ".password"){
+            return res.status(400).json(
+                {
+                    message: "Invalid data", 
+                    errors: validate.errors[0].message = "Must contain 1 uppercase, 1 number and min 8 character long"
+                })
+        }else{
+
+            return res.status(400).json(
+                {
+                    message: "Invalid data", 
+                    errors: validate.errors[0].message = "Invalid email format"
+                })
+        }
     }
-
-
 
     try {
       const checkExistingUser = await usersCl.findOne({ email: newUser.email });
