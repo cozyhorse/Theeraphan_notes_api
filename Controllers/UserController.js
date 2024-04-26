@@ -1,21 +1,21 @@
 const express = require("express");
-const { client } = require("../mongodb");
-const {isRegisterBody} = require("../Util/Validate");
+const { client, usersCollection } = require("../mongodb");
+const { isRegisterBody } = require("../Util/Validate");
 const { hashPassword, compareHash } = require("../Model/bcrypt");
 const Ajv = require("ajv");
 const { userSchema } = require("../Model/UserSchema");
 const jwt = require("jsonwebtoken");
+const { verifyToken } = require("../Model/jwt");
 const ajv = new Ajv();
 const user = express.Router();
 
-//Get Database
-const userDb = client.db("notes_api");
-//Get collection "users" in database "notes_api"
-const usersCl = userDb.collection("users");
+
 
 user.use(express.json());
+//compile userSchema
+const validate = ajv.compile(userSchema);
 
-const validate = ajv.compile(userSchema)
+//Signup post
 user
   .post("/signup", isRegisterBody, async (req, res) => {
     let { email, password } = req.body;
@@ -23,32 +23,32 @@ user
     const newUser = { email, password };
 
     const valid = validate(newUser);
-    if(!valid){
-        if(validate.errors[0].dataPath === ".password"){
-            return res.status(400).json(
-                {
-                    message: "Invalid data", 
-                    errors: validate.errors[0].message = "Must contain 1 uppercase, 1 number and min 8 character long"
-                })
-        }else{
-
-            return res.status(400).json(
-                {
-                    message: "Invalid data", 
-                    errors: validate.errors[0].message = "Invalid email format"
-                })
-        }
+    if (!valid) {
+      if (validate.errors[0].dataPath === ".password") {
+        return res.status(400).json({
+          message: "Invalid data",
+          errors: (validate.errors[0].message =
+            "Must contain 1 uppercase, 1 number and min 8 character long"),
+        });
+      } else {
+        return res.status(400).json({
+          message: "Invalid data",
+          errors: (validate.errors[0].message = "Invalid email format"),
+        });
+      }
     }
 
     try {
-      const checkExistingUser = await usersCl.findOne({ email: newUser.email });
+      const checkExistingUser = await usersCollection.findOne({
+        email: newUser.email,
+      });
       if (checkExistingUser)
         return res
           .status(409)
           .json({ success: false, message: "Email already exits" });
 
-//Create new user and insert in collection with hashed password
-      await usersCl.insertOne({
+      //Create new user and insert in collection with hashed password
+      await usersCollection.insertOne({
         email: email,
         password: await hashPassword(password),
       });
@@ -58,24 +58,37 @@ user
     }
   })
 
-//Login
+  //Login post
   .post("/login", async (req, res) => {
     const { email, password } = req.body;
-    const user = await usersCl.findOne({ email})
+    const user = await usersCollection.findOne({ email });
 
-    if(!user)
-        return res.status(404).json({ success: false, message: "Email doesn't exists"})
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "Email doesn't exists" });
 
+    //check password
     const isPassword = await compareHash(password, user.password);
     if (!isPassword) {
-        return res.status(401).json({
-            success: false,
-            message: "Invalid password",
-        })
-    }else{
-        res.status(201).json({ success: true,})
-    }  
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password",
+      });
+    } else {
+      //assign token
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+      res.status(201).json({ success: true, token: token });
+    }
+  })
 
-  });
+  .get("/all", verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    console.log("userId", userId);
+    const allusers = await usersCollection.find({}).toArray();
+    return res.status(200).json(allusers);
+  })
 
 module.exports = { user };

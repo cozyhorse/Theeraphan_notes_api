@@ -12,4 +12,10 @@ const client = new MongoClient(uri, {
   }
 });
 
-module.exports = {client};
+const database = client.db("notes_api")
+//Get collection "notes" in database "notes_api"
+const noteCollection = database.collection("notes")
+//Get collection "users" in database "notes_api"
+const usersCollection = database.collection("users");
+
+module.exports = {client, noteCollection, usersCollection};

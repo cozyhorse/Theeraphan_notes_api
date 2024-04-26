@@ -1,6 +1,12 @@
 const { note } = require("./Controllers/NotesController");
 const { user } = require("./Controllers/UserController");
 const { client } = require("./mongodb");
+// //Get Database
+// const database = client.db("notes_api")
+// //Get collection "notes" in database "notes_api"
+// const noteCollection = database.collection("notes")
+// //Get collection "users" in database "notes_api"
+// const usersCollection = database.collection("users");
 
 const express = require("express");
 
