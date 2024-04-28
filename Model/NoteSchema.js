@@ -4,7 +4,7 @@ const noteSchema = {
     properties: {
         id: {type: "string"},
         title: {type: "string", maxLength: 50},
-        text: {type: "string", maxLength: 500},
+        text: {type: "string", maxLength: 300},
 
 
     }

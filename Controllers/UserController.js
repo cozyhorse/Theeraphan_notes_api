@@ -12,7 +12,7 @@ const user = express.Router();
 
 
 user.use(express.json());
-//compile userSchema
+//compile userSchema and set "rules" to "validate"
 const validate = ajv.compile(userSchema);
 
 //Signup post
@@ -21,7 +21,7 @@ user
     let { email, password } = req.body;
     email = email.toLowerCase();
     const newUser = { email, password };
-
+    //Use "validate" and pass in newUser and store result in "valid"
     const valid = validate(newUser);
     if (!valid) {
       if (validate.errors[0].dataPath === ".password") {
