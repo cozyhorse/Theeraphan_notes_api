@@ -9,3 +9,5 @@ const noteSchema = {
 
     }
 }
+
+module.exports = {noteSchema}
