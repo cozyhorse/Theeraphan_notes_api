@@ -6,10 +6,11 @@ const momentjs = require("moment");
 const { noteCollection } = require("../mongodb");
 const { noteSchema } = require("../Model/NoteSchema");
 const { verifyToken } = require("../Model/jwt");
+const { ObjectId } = require("mongodb");
 
 const moment = momentjs();
-
 note.use(express.json());
+//verify token before accessing the endpoints
 note.use(verifyToken);
 const validate = ajv.compile(noteSchema);
 //get notes
@@ -20,16 +21,25 @@ note
     try {
       const notes = await noteCollection.find({ id: userId }).toArray();
       if (notes.length === 0) {
-          return res.status(404).json({ message: "No notes have been made" });
-        }
-        return res.status(200).json(notes);
+        return res.status(404).json({ message: "No notes have been made" });
+      }
+      return res.status(200).json(notes);
     } catch (error) {
       return res.status(500).json({ message: "Internal server error" });
     }
   })
 
-  .get("/notes/search", (req, res) => {
-    //Search for a post based on title
+  .get("/notes/search", async (req, res) => {
+    //Search for a post based on title and belongs to the useId
+    const userId = req.user.id;
+    const { title } = req.query;
+    const notes = await noteCollection.find({ id: userId }).toArray();
+    const foundNote = notes.filter((note) => note.title.includes(title));
+    if (foundNote.length === 0)
+      return res.status(404).json({ message: "No notes found!" });
+
+    console.log("foundNote", foundNote);
+    res.status(200).json(foundNote);
   })
 
   //Create notes
@@ -68,12 +78,60 @@ note
   })
 
   //Edit notes
-  .put("/notes", (req, res) => {
+  .put("/notes/:id", async (req, res) => {
     //Find note by id... add "modifiedAt:date"
+    const noteId = req.params.id;
+    let newText = req.body.text;
+    console.log("noteId", noteId);
+    //checks if noteId is valid or if noteId exists
+    try {
+      const foundNote = await noteCollection.findOne({
+        _id: new ObjectId(noteId),
+      });
+      //console.log("foundNote", foundNote);
+      if (!foundNote) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+    } catch (error) {
+      return res.status(404).json({ message: "ID invalid" });
+    }
+
+    //Modify the document and add "modiefiedAt: date"
+    try {
+      await noteCollection.updateOne(
+        { _id: new ObjectId(noteId) },
+        { $set: { text: newText, modifiedAt: moment.format("L: LT") } }
+      );
+      res.status(200).json({ message: "Document edited" });
+    } catch (error) {
+      res.status(400).json(error);
+    }
   })
 
-  .delete("/notes", (req, res) => {
+  .delete("/notes/:id", async (req, res) => {
     //Delete note
+    const noteId = req.params.id;
+    console.log("noteId", noteId);
+    //checks if noteId is valid or if noteId exists
+    try {
+      const foundNote = await noteCollection.findOne({
+        _id: new ObjectId(noteId),
+      });
+      //console.log("foundNote", foundNote);
+      if (!foundNote) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+    } catch (error) {
+      return res.status(404).json({ message: "ID invalid" });
+    }
+
+    //Delete the document"
+    try {
+      await noteCollection.deleteOne({ _id: new ObjectId(noteId) });
+      res.status(200).json({ message: "Document deleted" });
+    } catch (error) {
+      res.status(400).json(error);
+    }
   });
 
 module.exports = { note };
