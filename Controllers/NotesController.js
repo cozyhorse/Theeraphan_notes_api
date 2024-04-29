@@ -21,7 +21,7 @@ note
     try {
       const notes = await noteCollection.find({ id: userId }).toArray();
       if (notes.length === 0) {
-        return res.status(404).json({ message: "No notes have been made" });
+        return res.status(404).json({ message: "No notes could be found" });
       }
       return res.status(200).json(notes);
     } catch (error) {
@@ -71,7 +71,7 @@ note
         ...newNote,
         createdAt: moment.format("L: LT"),
       });
-      return res.status(200).json({ message: "Note added!" });
+      return res.status(201).json({ message: "Note added!" });
     } catch (error) {
       return res.status(500).json({ message: "Internal server error" });
     }
@@ -119,7 +119,7 @@ note
       });
       //console.log("foundNote", foundNote);
       if (!foundNote) {
-        return res.status(404).json({ message: "Note not found" });
+        return res.status(409).json({ message: "Note not found" });
       }
     } catch (error) {
       return res.status(404).json({ message: "ID invalid" });

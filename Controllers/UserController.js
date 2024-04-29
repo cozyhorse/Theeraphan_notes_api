@@ -80,7 +80,7 @@ user
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "8h",
       });
-      res.status(201).json({ success: true, token: token });
+      res.status(200).json({ success: true, token: token });
     }
   })
 
