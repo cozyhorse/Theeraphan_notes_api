@@ -1,5 +1,5 @@
 const express = require("express");
-const { client, usersCollection } = require("../mongodb");
+const { usersCollection } = require("../mongodb");
 const { isRegisterBody } = require("../Util/Validate");
 const { hashPassword, compareHash } = require("../Model/bcrypt");
 const Ajv = require("ajv");
