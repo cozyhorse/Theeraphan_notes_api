@@ -19,7 +19,7 @@ note
     const userId = req.user.id;
     //get notes based on users id
     try {
-      const notes = await noteCollection.find({ id: userId }).toArray();
+      const notes = await noteCollection.find({ userid: userId }).toArray();
       if (notes.length === 0) {
         return res.status(404).json({ message: "No notes could be found" });
       }
@@ -67,7 +67,7 @@ note
       }
 
       noteCollection.insertOne({
-        id: await userId,
+        userid: await userId,
         ...newNote,
         createdAt: moment.format("L: LT"),
       });
