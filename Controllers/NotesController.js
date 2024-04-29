@@ -6,36 +6,34 @@ const momentjs = require("moment");
 const { noteCollection } = require("../mongodb");
 const { noteSchema } = require("../Model/NoteSchema");
 const { verifyToken } = require("../Model/jwt");
-const { user } = require("./UserController");
 
 const moment = momentjs();
 
 note.use(express.json());
+note.use(verifyToken);
 const validate = ajv.compile(noteSchema);
 //get notes
 note
-  .get("/notes", verifyToken, async (req, res) => {
+  .get("/notes", async (req, res) => {
     const userId = req.user.id;
     //get notes based on users id
-try {
-        const notes = await noteCollection
-          .find({ id: userId })
-          .toArray();
-    
+    try {
+      const notes = await noteCollection.find({ id: userId }).toArray();
+      if (notes.length === 0) {
+          return res.status(404).json({ message: "No notes have been made" });
+        }
         return res.status(200).json(notes);
-} catch (error) {
-    return res.status(404).json({message: "No notes have been made"})
-    
-}
+    } catch (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
   })
 
   .get("/notes/search", (req, res) => {
     //Search for a post based on title
-    
   })
 
   //Create notes
-  .post("/notes", verifyToken, async (req, res) => {
+  .post("/notes", async (req, res) => {
     //Create post and add "createdAt:date"
     const userId = req.user.id;
     console.log(userId);
