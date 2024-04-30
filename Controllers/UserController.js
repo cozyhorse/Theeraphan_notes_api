@@ -5,7 +5,7 @@ const { hashPassword, compareHash } = require("../Model/bcrypt");
 const Ajv = require("ajv");
 const { userSchema } = require("../Model/UserSchema");
 const jwt = require("jsonwebtoken");
-const { verifyToken } = require("../Model/jwt");
+// const { verifyToken } = require("../Model/jwt");
 const ajv = new Ajv();
 const user = express.Router();
 
@@ -84,11 +84,12 @@ user
     }
   })
 
-  .get("/all", verifyToken, async (req, res) => {
-    const userId = req.user.id;
-    console.log("userId", userId);
-    const allusers = await usersCollection.find({}).toArray();
-    return res.status(200).json(allusers);
-  })
+//Token testing
+//   .get("/all", verifyToken, async (req, res) => {
+//     const userId = req.user.id;
+//     console.log("userId", userId);
+//     const allusers = await usersCollection.find({}).toArray();
+//     return res.status(200).json(allusers);
+//   })
 
 module.exports = { user };

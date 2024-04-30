@@ -8,7 +8,7 @@ const verifyToken = async (req, res, next) => {
   if (!token)
     return res
       .status(401)
-      .json({ message: "Unauthorized, no token provided!" });
+      .json({ message: "Unauthorized" });
 
   try {
     const verifiedToken = await jwt.verify(token, process.env.JWT_SECRET);

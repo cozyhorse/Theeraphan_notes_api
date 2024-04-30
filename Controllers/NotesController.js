@@ -32,13 +32,15 @@ note
   .get("/notes/search", async (req, res) => {
     //Search for a post based on title and belongs to the useId
     const userId = req.user.id;
+    //console.log("userID", userId)
     const { title } = req.query;
-    const notes = await noteCollection.find({ id: userId }).toArray();
+    //console.log("search", title)
+    const notes = await noteCollection.find({ userid: userId }).toArray();
     const foundNote = notes.filter((note) => note.title.includes(title));
     if (foundNote.length === 0)
       return res.status(404).json({ message: "No notes found!" });
 
-    console.log("foundNote", foundNote);
+    //console.log("foundNote", foundNote);
     res.status(200).json(foundNote);
   })
 
@@ -46,7 +48,7 @@ note
   .post("/notes", async (req, res) => {
     //Create post and add "createdAt:date"
     const userId = req.user.id;
-    console.log(userId);
+    //console.log(userId);
     let { title, text } = req.body;
 
     const newNote = { title, text };
@@ -82,7 +84,7 @@ note
     //Find note by id... add "modifiedAt:date"
     const noteId = req.params.id;
     let newText = req.body.text;
-    console.log("noteId", noteId);
+    //console.log("noteId", noteId);
     //checks if noteId is valid or if noteId exists
     try {
       const foundNote = await noteCollection.findOne({
@@ -111,7 +113,7 @@ note
   .delete("/notes/:id", async (req, res) => {
     //Delete note
     const noteId = req.params.id;
-    console.log("noteId", noteId);
+    //console.log("noteId", noteId);
     //checks if noteId is valid or if noteId exists
     try {
       const foundNote = await noteCollection.findOne({
