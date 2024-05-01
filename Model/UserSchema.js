@@ -9,7 +9,7 @@ const userSchema = {
     //must contain @ and can't have spaces 
     //("email@email.com  ", "email@email.com  s")//false
     //("email@email.com")//true
-            pattern: "^[^\s@]+@[^\s@]+\.[^\s@]+$"
+            pattern: "^[^\s@]+@[^\s@]+\.[^@]+$"
         },
         password: {
             type: "string",

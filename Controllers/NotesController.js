@@ -68,7 +68,7 @@ note
           .json({ errors: `Title ${validate.errors[0].message}` });
       }
 
-      noteCollection.insertOne({
+      await noteCollection.insertOne({
         userid: await userId,
         ...newNote,
         createdAt: moment.format("L: LT"),
@@ -110,8 +110,8 @@ note
     }
   })
 
+  //Delete note
   .delete("/notes/:id", async (req, res) => {
-    //Delete note
     const noteId = req.params.id;
     //console.log("noteId", noteId);
     //checks if noteId is valid or if noteId exists

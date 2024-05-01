@@ -59,7 +59,7 @@ user
   })
 
   //Login post
-  .post("/login", async (req, res) => {
+  .post("/login", isRegisterBody, async (req, res) => {
     const { email, password } = req.body;
     const user = await usersCollection.findOne({ email });
 
