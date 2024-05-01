@@ -7,9 +7,10 @@ const { noteCollection } = require("../mongodb");
 const { noteSchema } = require("../Model/NoteSchema");
 const { verifyToken } = require("../Model/jwt");
 const { ObjectId } = require("mongodb");
-
 const moment = momentjs();
+
 note.use(express.json());
+
 //verify token before accessing the endpoints
 note.use(verifyToken);
 const validate = ajv.compile(noteSchema);
