@@ -30,7 +30,7 @@ note
   })
 
   .get("/notes/search", async (req, res) => {
-    //Search for a post based on title and belongs to the useId
+    //Search for a post based on title and belongs to the userId
     const userId = req.user.id;
     //console.log("userID", userId)
     const { title } = req.query;
