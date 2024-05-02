@@ -73,6 +73,7 @@ note
         userid: await userId,
         ...newNote,
         createdAt: moment.format("L: LT"),
+        modifiedAt: "",
       });
       return res.status(201).json({ message: "Note added!" });
     } catch (error) {
@@ -129,12 +130,8 @@ note
     }
 
     //Delete the document"
-    try {
       await noteCollection.deleteOne({ _id: new ObjectId(noteId) });
       res.status(200).json({ message: "Document deleted" });
-    } catch (error) {
-      res.status(400).json(error);
-    }
   });
 
 module.exports = { note };
